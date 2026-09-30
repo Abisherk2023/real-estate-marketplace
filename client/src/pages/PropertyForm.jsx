@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import api from "../api/axios";
+import LocationPicker from "../components/LocationPicker";
 
 const emptyForm = {
   title: "", description: "", price: "", listingType: "sale",
   propertyType: "house", bedrooms: 0, bathrooms: 0, area: "",
-  address: "", city: "",
+  address: "", city: "", latitude: "", longitude: "",
 };
 
 export default function PropertyForm() {
@@ -30,7 +31,7 @@ export default function PropertyForm() {
           title: p.title, description: p.description, price: p.price,
           listingType: p.listingType, propertyType: p.propertyType,
           bedrooms: p.bedrooms, bathrooms: p.bathrooms, area: p.area || "",
-          address: p.address, city: p.city,
+          address: p.address, city: p.city, latitude: p.latitude ?? "", longitude: p.longitude ?? "",
         });
         setExistingImages(p.images || []);
       })
@@ -157,6 +158,16 @@ export default function PropertyForm() {
             <label className={labelClass}>City</label>
             <input name="city" required value={form.city} onChange={handleChange} className={inputClass} />
           </div>
+        </div>
+
+        {/* Location Picker */}
+        <div>
+          <label className={labelClass}>Location on map (optional, click to place a pin)</label>
+          <LocationPicker
+            lat={form.latitude}
+            lng={form.longitude}
+            onChange={(lat, lng) => setForm((f) => ({ ...f, latitude: lat, longitude: lng }))}
+          />
         </div>
 
         {/* Existing images (edit mode) */}

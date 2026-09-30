@@ -74,8 +74,8 @@ exports.getProperties = async (req, res) => {
 
     const total = await Property.countDocuments(query);
     const properties = await Property.find(query)
-      .populate("agent", "name email phone")
-      .sort(sortOptions[sort] || sortOptions.newest)
+      .populate("agent", "name email phone verificationStatus")
+      .sort({ featured: -1, ...(sortOptions[sort] || sortOptions.newest) })
       .skip((pageNum - 1) * limitNum)
       .limit(limitNum);
 
@@ -95,7 +95,7 @@ exports.getPropertyById = async (req, res) => {
   try {
     const property = await Property.findById(req.params.id).populate(
       "agent",
-      "name email phone"
+      "name email phone verificationStatus"
     );
     if (!property) return res.status(404).json({ message: "Property not found" });
     res.json(property);
@@ -134,6 +134,7 @@ exports.updateProperty = async (req, res) => {
     const fields = [
       "title", "description", "price", "listingType", "propertyType",
       "bedrooms", "bathrooms", "area", "address", "city",
+      "latitude", "longitude",
     ];
     fields.forEach((f) => {
       if (req.body[f] !== undefined) property[f] = req.body[f];
@@ -184,5 +185,58 @@ exports.deletePropertyImage = async (req, res) => {
     res.json(property);
   } catch (error) {
     res.status(500).json({ message: error.message });
+  }
+};
+
+// POST /api/properties/:id/view  (public)
+exports.incrementViews = async (req, res) => {
+  try {
+    await Property.findByIdAndUpdate(
+      req.params.id,
+      { $inc: { views: 1 } },
+      { timestamps: false }
+    );
+    res.json({ ok: true });
+  } catch (error) {
+    res.status(400).json({ message: "Invalid property id" });
+  }
+};
+
+// GET /api/properties/:id/similar  (public)
+exports.getSimilarProperties = async (req, res) => {
+  try {
+    const property = await Property.findById(req.params.id);
+    if (!property) return res.status(404).json({ message: "Property not found" });
+
+    // 1) Same listing type and property type, price within +/- 30%
+    let similar = await Property.find({
+      _id: { $ne: property._id },
+      status: "approved",
+      listingType: property.listingType,
+      propertyType: property.propertyType,
+      price: { $gte: property.price * 0.7, $lte: property.price * 1.3 },
+    })
+      .populate("agent", "name")
+      .sort({ featured: -1, createdAt: -1 })
+      .limit(3);
+
+    // 2) If there are fewer than 3, fill up with the same city
+    if (similar.length < 3) {
+      const excludeIds = [property._id, ...similar.map((p) => p._id)];
+      const more = await Property.find({
+        _id: { $nin: excludeIds },
+        status: "approved",
+        listingType: property.listingType,
+        city: property.city,
+      })
+        .populate("agent", "name")
+        .sort({ createdAt: -1 })
+        .limit(3 - similar.length);
+      similar = [...similar, ...more];
+    }
+
+    res.json(similar);
+  } catch (error) {
+    res.status(400).json({ message: "Invalid property id" });
   }
 };

@@ -16,6 +16,10 @@ const propertySchema = new mongoose.Schema(
     area: { type: Number }, // in sq ft
     address: { type: String, required: true },
     city: { type: String, required: true },
+    latitude: { type: Number },
+    longitude: { type: Number },
+    views: { type: Number, default: 0 },
+    featured: { type: Boolean, default: false },
     images: [{ url: String, public_id: String }],
     agent: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
     status: {

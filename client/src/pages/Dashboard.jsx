@@ -67,12 +67,26 @@ export default function Dashboard() {
     <div className="max-w-6xl mx-auto px-4 py-8">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold text-gray-800">Agent dashboard</h1>
-        <Link
-          to="/dashboard/properties/new"
-          className="bg-emerald-600 text-white px-4 py-2 rounded font-semibold hover:bg-emerald-700"
-        >
-          + Add property
-        </Link>
+        <div className="flex flex-wrap gap-2">
+          <Link
+            to="/dashboard/verification"
+            className="bg-white border px-4 py-2 rounded font-semibold text-gray-700 hover:bg-gray-50"
+          >
+            ✔ Get verified
+          </Link>
+          <Link
+            to="/dashboard/analytics"
+            className="bg-white border px-4 py-2 rounded font-semibold text-gray-700 hover:bg-gray-50"
+          >
+            📊 Analytics
+          </Link>
+          <Link
+            to="/dashboard/properties/new"
+            className="bg-emerald-600 text-white px-4 py-2 rounded font-semibold hover:bg-emerald-700"
+          >
+            + Add property
+          </Link>
+        </div>
       </div>
 
       <div className="grid grid-cols-2 gap-4 mb-6">

@@ -36,8 +36,11 @@ exports.login = async (req, res) => {
     const user = await User.findOne({ email });
 
     if (user && (await user.matchPassword(password))) {
-      return res.json(userResponse(user));
-    }
+  if (user.isActive === false) {
+    return res.status(403).json({ message: "Your account has been suspended" });
+  }
+  return res.json(userResponse(user));
+}
     res.status(401).json({ message: "Invalid email or password" });
   } catch (error) {
     res.status(500).json({ message: error.message });

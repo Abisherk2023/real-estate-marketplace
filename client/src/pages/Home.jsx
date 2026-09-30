@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../api/axios";
 import PropertyCard from "../components/PropertyCard";
+import RecentlyViewed from "../components/RecentlyViewed";
+
 
 export default function Home() {
   const [latest, setLatest] = useState([]);

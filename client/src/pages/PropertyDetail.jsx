@@ -1,8 +1,14 @@
 import { useEffect, useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import api from "../api/axios";
 import ImageGallery from "../components/ImageGallery";
 import InquiryForm from "../components/InquiryForm";
+import PropertyMap from "../components/PropertyMap";
+import EmiCalculator from "../components/EmiCalculator";
+import { useAuth } from "../context/AuthContext";
+import VerifiedBadge from "../components/VerifiedBadge";
+import ReportButton from "../components/ReportButton";
+import SimilarProperties from "../components/SimilarProperties";
 
 export default function PropertyDetail() {
   const { id } = useParams();
@@ -10,13 +16,38 @@ export default function PropertyDetail() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  const { user } = useAuth();
+  const navigate = useNavigate();
+
+  // Fetch property details by ID
   useEffect(() => {
-    api
-      .get(`/properties/${id}`)
-      .then((res) => setProperty(res.data))
-      .catch(() => setError("Property not found"))
-      .finally(() => setLoading(false));
+    const fetchProperty = async () => {
+      setLoading(true);
+      setError("");
+      try {
+        const { data } = await api.get(`/properties/${id}`);
+        setProperty(data);
+      } catch (err) {
+        setError(err.response?.data?.message || "Property not found");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProperty();
   }, [id]);
+
+  // Remember recently viewed properties (max 6)
+  useEffect(() => {
+    if (!property?._id) return;
+    try {
+      const list = JSON.parse(localStorage.getItem("recentlyViewed")) || [];
+      const next = [property._id, ...list.filter((x) => x !== property._id)].slice(0, 6);
+      localStorage.setItem("recentlyViewed", JSON.stringify(next));
+    } catch (e) {
+      // storage blocked, ignore
+    }
+  }, [property?._id]);
 
   if (loading) return <p className="text-center mt-12 text-gray-500">Loading...</p>;
   if (error || !property)
@@ -28,6 +59,18 @@ export default function PropertyDetail() {
         </Link>
       </div>
     );
+
+  const isOwner = user && user._id === property.agent?._id;
+
+  const startChat = async () => {
+    if (!user) return navigate("/login");
+    try {
+      const { data } = await api.post("/chat/conversations", { propertyId: id });
+      navigate(`/messages/${data._id}`);
+    } catch (err) {
+      alert(err.response?.data?.message || "Could not start chat");
+    }
+  };
 
   const {
     title, description, price, listingType, propertyType,
@@ -85,6 +128,13 @@ export default function PropertyDetail() {
             <h2 className="font-bold text-gray-800 mt-6 mb-2">Description</h2>
             <p className="text-gray-600 whitespace-pre-line">{description}</p>
 
+            {property.latitude != null && property.longitude != null && (
+              <>
+                <h2 className="font-bold text-gray-800 mt-6 mb-2">Location</h2>
+                <PropertyMap lat={property.latitude} lng={property.longitude} />
+              </>
+            )}
+
             <p className="text-xs text-gray-400 mt-4">
               Listed on {new Date(createdAt).toLocaleDateString()}
             </p>
@@ -95,14 +145,30 @@ export default function PropertyDetail() {
         <div className="space-y-6">
           <div className="bg-white p-6 rounded-xl shadow">
             <h3 className="font-bold text-gray-800 mb-3">Listed by</h3>
-            <p className="font-semibold text-gray-700">{agent?.name}</p>
+            <div className="flex items-center gap-2 flex-wrap">
+              <p className="font-semibold text-gray-700">{agent?.name}</p>
+              {agent?.verificationStatus === "verified" && <VerifiedBadge />}
+            </div>
             {agent?.phone && <p className="text-sm text-gray-500">📞 {agent.phone}</p>}
             {agent?.email && <p className="text-sm text-gray-500">✉️ {agent.email}</p>}
+
+            {!isOwner && (
+              <button
+                onClick={startChat}
+                className="mt-4 w-full bg-emerald-600 text-white py-2 rounded font-semibold hover:bg-emerald-700"
+              >
+                💬 Chat with agent
+              </button>
+            )}
+            {!isOwner && <ReportButton propertyId={id} />}
           </div>
 
           <InquiryForm propertyId={id} />
+          {listingType === "sale" && <EmiCalculator price={price} />}
         </div>
       </div>
+
+      <SimilarProperties propertyId={id} />
     </div>
   );
 }

@@ -1,20 +1,30 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useFavorites } from "../context/FavoritesContext";
+import { useCompare } from "../context/CompareContext";
 
 export default function PropertyCard({ property }) {
   const { _id, title, price, city, listingType, bedrooms, bathrooms, area, images } = property;
 
   const { user } = useAuth();
-  const { ids, toggle } = useFavorites();
+  const { ids: favIds, toggle: toggleFav } = useFavorites();
+  const { ids: compareIds, toggle: toggleCompare, full } = useCompare();
   const navigate = useNavigate();
-  const isFav = ids.includes(_id);
+
+  const isFav = favIds.includes(_id);
+  const inCompare = compareIds.includes(_id);
 
   const handleHeart = (e) => {
     e.preventDefault();
     e.stopPropagation();
     if (!user) return navigate("/login");
-    toggle(_id);
+    toggleFav(_id);
+  };
+
+  const handleCompare = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    toggleCompare(_id);
   };
 
   return (
@@ -47,6 +57,25 @@ export default function PropertyCard({ property }) {
           <span className={isFav ? "text-red-500" : "text-gray-400"}>
             {isFav ? "♥" : "♡"}
           </span>
+        </button>
+
+        {property.featured && (
+          <span className="absolute bottom-3 left-3 bg-amber-400 text-amber-950 text-xs font-bold px-2 py-1 rounded">
+            ⭐ Featured
+          </span>
+        )}
+
+        <button
+          onClick={handleCompare}
+          disabled={!inCompare && full}
+          title={!inCompare && full ? "You can compare up to 3 properties" : ""}
+          className={`absolute bottom-3 right-3 text-xs font-semibold px-2 py-1 rounded shadow ${
+            inCompare
+              ? "bg-gray-900 text-white"
+              : "bg-white/90 text-gray-700 hover:bg-white disabled:opacity-50"
+          }`}
+        >
+          ⚖ {inCompare ? "Added" : "Compare"}
         </button>
       </div>
 

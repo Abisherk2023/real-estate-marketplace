@@ -1,9 +1,11 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { useSocket } from "../context/SocketContext";
 
 export default function Navbar() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const { unread } = useSocket();
 
   const handleLogout = () => {
     logout();
@@ -25,6 +27,14 @@ export default function Navbar() {
 
           {user ? (
             <>
+              <Link to="/messages" className="relative hover:text-emerald-600">
+  💬 Messages
+  {unread > 0 && (
+    <span className="absolute -top-2 -right-4 bg-red-500 text-white text-[10px] rounded-full px-1.5">
+      {unread}
+    </span>
+  )}
+</Link>
               <Link to="/favorites" className="hover:text-emerald-600">♥ Saved</Link>
               {isAgent && (
                 <Link to="/dashboard" className="hover:text-emerald-600">Dashboard</Link>

@@ -9,6 +9,14 @@ const userSchema = new mongoose.Schema(
     role: { type: String, enum: ["buyer", "agent", "admin"], default: "buyer" },
     phone: { type: String },
     favorites: [{ type: mongoose.Schema.Types.ObjectId, ref: "Property" }],
+    isActive: { type: Boolean, default: true },
+verificationStatus: {
+  type: String,
+  enum: ["none", "pending", "verified", "rejected"],
+  default: "none",
+},
+licenseNo: { type: String },
+verificationNote: { type: String },
   },
   { timestamps: true }
 );
