@@ -1,16 +1,36 @@
-# React + Vite
+## 🏡 Real Estate Marketplace
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A full-stack web application designed for property buyers, renters, sellers, and real estate agents. The platform facilitates seamless property discovery, direct real-time agent communication, interactive tools, and agent verification.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+### ✨ Key Features
 
-## React Compiler
+#### 🔍 Property Discovery & Filtering
+* **Advanced Search & Filter:** Filter properties by listing type (sale/rent), property type, city, price range, bedrooms, and bathrooms.
+* **Interactive Map Integration:** View property locations with precise coordinates using Leaflet map view (`PropertyMap`).
+* **Similar Properties:** Smart recommendations at the bottom of property listings based on location and price.
+* **Recently Viewed:** Automatically stores and displays recently browsed properties using local storage.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+#### 📊 Tools & Utilities
+* **Property Comparison (`CompareBar`):** Compare multiple properties side-by-side on price, area, room count, and amenities.
+* **EMI Calculator:** Built-in loan installment estimator on property detail pages for prospective buyers.
+* **Property Reporting:** Flag suspicious or fraudulent listings directly to administrators (`ReportButton`).
 
-## Expanding the ESLint configuration
+#### 💬 Communication & Interaction
+* **Real-time Chat:** Direct agent-to-buyer messaging powered by **Socket.io** for live instant communication.
+* **Inquiry System:** Submit inquiries directly to property owners with tracking inside the agent dashboard.
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+#### 🛡️ Agent Verification & Dashboard
+* **Verified Agent Badge (`VerifiedBadge`):** Identity verification workflow allowing legitimate agents to get verified by admins.
+* **Agent Dashboard:** Manage property listings, track unread inquiries, and monitor listing analytics.
+* **Admin Control Panel:** Admin panel for property approvals, user management, handling verification requests, and reviewing flagged content.
+
+---
+
+### 🛠️ Tech Stack
+
+* **Frontend:** React, React Router DOM, Tailwind CSS, Axios, Socket.io-client
+* **Backend:** Node.js, Express.js, Socket.io
+* **Database:** MongoDB & Mongoose
+* **Authentication:** JWT (JSON Web Tokens)
